@@ -243,6 +243,7 @@ const LASTI=BOXERS.reduce((a,b,i)=>b.open?a:i,0),FIRST3D=BOXERS.findIndex(b=>b.l
 const G={state:'menu',time:0,pick:FIRST3D<0?0:FIRST3D,hudTop:14};
 let F=null,fx=[];
 const PY=()=>F&&F.def.look.model?580:552,BODYY=()=>F&&F.def.look.bodyY||300;
+const YOU3D='champ',you3d=()=>!!(window.R3D&&R3D.ok(YOU3D));
 const SAVE={unlocked:1,wins:[],sound:1};
 try{Object.assign(SAVE,JSON.parse(localStorage.getItem('bellringer')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('bellringer',JSON.stringify(SAVE))}catch(e){}};
@@ -298,10 +299,10 @@ function strikePose(m){const s=m.side,g=[-s*58,-170,1];
 /* ---------- a fight ---------- */
 function banner(text,dur){F.msg={text,t:0,dur}}
 function startFight(i){
- const d=BOXERS[i];fx=[];if(d.look.model&&window.R3D){R3D.load(d.look.model,'models/'+d.look.model);R3D.reset(d.look.model)}
+ const d=BOXERS[i];fx=[];if(d.look.model&&window.R3D){R3D.load(d.look.model,'models/'+d.look.model);R3D.reset(d.look.model)}if(window.R3D)R3D.reset(YOU3D);
  F={i,def:d,round:1,clock:180,phase:'intro',t:0,count:0,countT:0,msg:null,pts:0,taken:0,shake:0,stop:0,zoom:0,cheer:0,result:null,
   o:{def:d,hp:d.hp,maxHp:d.hp,disp:d.hp,state:'idle',t:0,dur:1.2,guard:'high',guardT:1.5,free:d.free,pat:null,pi:0,move:null,hits:0,hitT:0,kd:0,kdR:0,lie:0,fallSide:1,landed:false,peekT:0,hurtT:0,sp:{hx:0,hxv:0,hy:0,hyv:0,ht:0,htv:0,hs:0,hsv:0,sq:0,sqv:0,lean:0,leanv:0,by:0,byv:0},flash:0,blockT:0,spd:d.speed,pose:Object.assign({},P_GH),missed:false,riseAt:0,hitSide:1,hitHigh:true,counterQ:false},
-  p:{hp:96,maxHp:96,disp:96,hearts:d.hearts,maxHearts:d.hearts,stars:0,state:'idle',t:0,dir:0,evading:false,hand:'L',high:false,star:false,done:false,tired:false,kd:0,kdR:0,mash:0,need:0,off:0,dy:0,spin:1,gl:[-40,-150,1],gr:[40,-150,1],flash:0,lastD:-9,buf:null,bufT:0,bufHigh:false,inp:blank(),prev:blank()}};
+  p:{hp:96,maxHp:96,disp:96,hearts:d.hearts,maxHearts:d.hearts,stars:0,state:'idle',t:0,dir:0,evading:false,hand:'L',high:false,star:false,done:false,tired:false,kd:0,kdR:0,mash:0,need:0,off:0,dy:0,spin:1,gl:[-40,-150,1],gr:[40,-150,1],flash:0,lastD:-9,buf:null,bufT:0,bufHigh:false,inp:blank(),prev:blank(),q:null,pu:0,aim:[480,300]}};
  banner('ROUND 1',1.4);
 }
 function gainStar(){const p=F.p;if(p.stars<3){p.stars++;sfx('star');fx.push({k:'text',x:480,y:250,t:0,dur:.8,text:'STAR!'})}}
@@ -347,7 +348,7 @@ function oppImpact(){
  o.missed=res==='miss';
  if(res==='miss'){p.hearts=Math.min(p.maxHearts,p.hearts+(p.tired?5:1));p.tired=false;sfx('whoosh')}
  else if(res==='block'){const dm=Math.ceil(m.dmg*o.def.dmg*.25);p.hp-=dm;f.taken+=dm;sfx('block');fx.push({k:'ring',x:480+p.off,y:PY()-152,t:0,dur:.16,r:30});if(p.hp<=0)playerDown()}
- else{const dm=Math.round(m.dmg*o.def.dmg);p.hp-=dm;f.taken+=dm;p.hearts=Math.max(0,p.hearts-3);if(p.hearts===0)p.tired=true;p.stars=Math.max(0,p.stars-1);p.state='hurt';p.t=0;p.flash=.16;p.spin=m.side||1;p.evading=false;p.buf=null;f.shake=12;f.stop=.08;f.zoom=Math.max(f.zoom,.03);sfx('ouch');
+ else{const dm=Math.round(m.dmg*o.def.dmg);p.hp-=dm;f.taken+=dm;p.hearts=Math.max(0,p.hearts-3);if(p.hearts===0)p.tired=true;p.stars=Math.max(0,p.stars-1);p.state='hurt';p.t=0;p.flash=.16;p.spin=m.side||1;if(you3d())R3D.nudge(YOU3D,-p.spin*520,260,420);p.evading=false;p.buf=null;f.shake=12;f.stop=.08;f.zoom=Math.max(f.zoom,.03);sfx('ouch');
   for(let k=0;k<5;k++)fx.push({k:'drop',x:480+p.off,y:PY()-160,vx:rnd(-300,300),vy:rnd(-380,-120),t:0,dur:.6});
   fx.push({k:'pow',x:480+p.off,y:PY()-152,t:0,dur:.22,r:54});if(p.hp<=0)playerDown()}
 }
@@ -449,11 +450,39 @@ function update(dt){
  else if(p.state==='punch'){const imp=p.star?.28:.09,u=p.t<imp?p.t/imp:Math.max(0,1-(p.t-imp)/(p.star?.3:.16)),LK=f.def.look,fy=436-(LK.build.th+LK.build.neckL+LK.head.ry*.4)*LK.sc-PY(),tx=p.star?[14,fy-10,.74]:p.high?[p.hand==='L'?-16:16,fy,.62]:[p.hand==='L'?-14:14,BODYY()-10-PY(),.7];
   const base=p.hand==='L'?gl:gr,g=[base[0]+(tx[0]-base[0])*u,base[1]+(tx[1]-base[1])*u,base[2]+(tx[2]-base[2])*u];if(p.hand==='L')gl=g;else gr=g;dy=-8*u}
  else if(p.state==='hurt'){dy=22;off=Math.sin(p.t*50)*6-p.spin*30*(1-p.t/.45)}
- else if(p.state==='down')dy=300-120*clamp(p.mash/(p.need||1),0,1)*(p.kdR<3?1:0);
+ else if(p.state==='down')dy=you3d()?205-135*clamp(p.mash/(p.need||1),0,1)*(p.kdR<3?1:0):300-120*clamp(p.mash/(p.need||1),0,1)*(p.kdR<3?1:0);
  else if(f.phase==='end'&&f.result&&f.result.win){const w=Math.sin(G.time*10);dy=-Math.abs(w)*26;gl=[-50,-262+w*34,1];gr=[50,-262-w*34,1]}
  if(p.state==='idle'&&f.phase!=='end'){const w=Math.sin(G.time*(p.tired?4:8));dy+=w*3+(p.tired?16:0);gl[1]+=w*4;gr[1]-=w*4}
  const kp=1-Math.exp(-30*dt);p.off+=(off-p.off)*kp;p.dy+=(dy-p.dy)*(p.state==='down'?1-Math.exp(-6*dt):kp);
  for(let i=0;i<3;i++){p.gl[i]+=(gl[i]-p.gl[i])*(1-Math.exp(-46*dt));p.gr[i]+=(gr[i]-p.gr[i])*(1-Math.exp(-46*dt))}
+ youPose(dt);
+}
+/* pose of the 3D player model (seen from behind). Gloves: x to screen right, y height, z forward, in model units. */
+const YK=['lean','tip','pitch','yaw','roll','nod','tilt','shrug','fwd','hop','lx','ly','lz','rx','ry','rz'];
+function youPose(dt){
+ const f=F,p=f.p,o=f.o,t=G.time,st=p.state,LK=f.def.look;
+ const T={lean:0,tip:0,pitch:.16,yaw:-.2,roll:0,nod:.12,tilt:0,shrug:.25,fwd:0,hop:0,lx:-.38,ly:1.6,lz:.3,rx:.38,ry:1.62,rz:.24};
+ let rate=24,pu=0;
+ if(st==='dodge'){const d=p.dir;T.lean=d*.2;T.roll=d*.3;T.yaw=d*.3;T.pitch=.28;T.tilt=d*.3;T.ly=T.ry=1.55;T.lx=-.34;T.rx=.34;rate=34}
+ else if(st==='duck'){T.pitch=.6;T.nod=.7;T.shrug=.8;T.yaw=0;T.ly=T.ry=1.52;T.lz=T.rz=.42;T.lx=-.3;T.rx=.3;rate=34}
+ else if(st==='block'){T.pitch=.3;T.nod=.5;T.shrug=1;T.yaw=0;T.lx=-.35;T.rx=.35;T.ly=T.ry=1.88;T.lz=T.rz=.3;rate=34}
+ else if(st==='punch'){
+  const sd=p.hand==='L'?-1:1,imp=p.star?.28:.09,w0=p.star?.16:0;
+  pu=p.t<w0?0:p.t<imp?(p.t-w0)/(imp-w0):Math.max(0,1-(p.t-imp)/(p.star?.3:.16));
+  if(p.star&&p.t<w0){T.yaw=-.6;T.pitch=.5;T.hop=-34;T.rx=.46;T.ry=1.08;T.rz=.02;T.roll=.15;rate=30}
+  else{T.yaw=sd*.8*pu-.2*(1-pu);T.pitch=.16+.12*pu;T.roll=-sd*.1*pu;T.fwd=.45*pu;T.hop=(p.star?150:p.high?92:14)*pu;T.nod=.12-.3*pu;rate=44}
+  p.aim=p.high?[480+o.pose.lean*200+o.pose.hx*.6+(p.star?0:sd*10),436-(LK.build.th+LK.build.neckL+LK.head.ry*.72)*LK.sc+o.pose.hy]:[480+o.pose.lean*200+sd*16,BODYY()+6];
+ }
+ else if(st==='hurt'){const k=1-p.t/.45;T.lean=-p.spin*.2*k;T.tip=.1*k;T.hop=14*k;T.pitch=-.3*k;T.nod=-.8*k;T.tilt=p.spin*.6*k;T.roll=-p.spin*.25*k;T.yaw=p.spin*.4*k;T.shrug=0;T.lx=-.62;T.rx=.62;T.ly=T.ry=1.38;T.lz=T.rz=.12;rate=36}
+ else if(st==='down'){T.tip=.75;T.lean=p.spin*.3;T.nod=-.6;T.pitch=-.2;T.shrug=0;T.yaw=0;T.lx=-.7;T.rx=.7;T.ly=T.ry=1.5;T.lz=T.rz=0;rate=7;
+  if(p.mash>0&&p.kdR<3){T.tip=.75-.6*clamp(p.mash/(p.need||1),0,1);T.roll=Math.sin(t*14)*.12;rate=12}}
+ else if(f.phase==='end'&&f.result&&f.result.win){const w=Math.sin(t*10);T.pitch=-.1;T.nod=-.35;T.yaw=0;T.shrug=.6;T.lx=-.4;T.rx=.4;T.ly=2.22+w*.14;T.ry=2.22-w*.14;T.lz=T.rz=.06;T.roll=w*.06}
+ else{const w=Math.sin(t*(p.tired?4:8));
+  if(p.tired){T.pitch=.5+w*.05;T.nod=.6;T.shrug=-.2+w*.3;T.yaw=0;T.ly=T.ry=1.26;T.lz=T.rz=.3;T.lx=-.36;T.rx=.36}
+  else{T.ly+=w*.02;T.ry-=w*.02;T.roll=Math.sin(t*4)*.035;T.yaw+=Math.sin(t*4)*.05}}
+ p.pu=pu;
+ if(!p.q){p.q=T;return}
+ const k=1-Math.exp(-rate*dt);for(const n of YK)p.q[n]+=(T[n]-p.q[n])*k;
 }
 
 /* ---------- drawing ---------- */
@@ -624,7 +653,19 @@ function drawOpp(c){
  }
  c.restore();c.restore();
 }
+function drawYou3D(c){
+ const f=F,p=f.p,q=p.q,t=G.time;if(!q)return false;
+ const a=R3D.drawPlayer(c,YOU3D,{t,x:480+p.off,y:PY()+p.dy-q.hop,fwd:q.fwd,lean:q.lean,tip:q.tip,pitch:q.pitch,yaw:q.yaw,roll:q.roll,nod:q.nod,turn:0,tilt:q.tilt,shrug:q.shrug,
+  l:{x:q.lx,y:q.ly,z:q.lz},r:{x:q.rx,y:q.ry,z:q.rz},punch:p.pu>0?{hand:p.hand,u:p.pu,ax:p.aim[0],ay:p.aim[1]}:null,
+  flashR:p.star&&p.state==='punch',flashCol:GOLD,tint:p.flash>0?p.flash/.16*.55:p.tired?.1:0,tintCol:p.flash>0?'#ffffff':'#f29bb4'},VW,OX,cv.width,cv.height);
+ if(!a)return false;
+ c.lineJoin='round';c.strokeStyle=ARENA;c.lineWidth=3;
+ if(p.state==='hurt')for(let k=0;k<3;k++){const an=t*9+k*2.1;star5(c,a.head[0]+Math.cos(an)*58,a.head[1]-4+Math.sin(an)*12,9,true)}
+ if(p.tired&&p.state!=='down'&&((t*3|0)&1)){c.fillStyle='#bfe9ff';c.beginPath();c.ellipse(a.head[0]+62,a.head[1]+34,6,10,0,0,6.3);c.fill();c.stroke()}
+ return true;
+}
 function drawYou(c){
+ if(you3d()&&drawYou3D(c))return;
  const f=F,p=f.p,px=480+p.off,py=PY()+p.dy,col=p.flash>0?'#fff':p.tired?'#f29bb4':MINT,dark=p.tired?'#b86a80':'#1f8f5f';
  if(p.dy>270)return;
  c.lineJoin='round';c.lineCap='round';c.strokeStyle=ARENA;c.lineWidth=3;
@@ -757,7 +798,7 @@ let last=0,acc=0,starOn=false;
 function frame(ts){const now=ts/1000;acc+=Math.min(.1,now-last);last=now;let n=0;while(acc>=STEP&&n<5){if(!G.hold)update(STEP);acc-=STEP;n++}if(n===5)acc=0;render();
  if(starBtn&&F){const r=F.p.stars>0;if(r!==starOn){starOn=r;starBtn.classList.toggle('ready',r)}}requestAnimationFrame(frame)}
 function boot(data){
- ladder();soundLabel();buildPads();resize();if(window.R3D)for(const b of BOXERS)if(b.look.model)R3D.load(b.look.model,'models/'+b.look.model).then(()=>{if(G.state==='menu')ladder()});
+ ladder();soundLabel();buildPads();resize();if(window.R3D)R3D.load(YOU3D,'models/'+YOU3D);if(window.R3D)for(const b of BOXERS)if(b.look.model)R3D.load(b.look.model,'models/'+b.look.model).then(()=>{if(G.state==='menu')ladder()});
  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>resize());
  if(data&&data.playing){begin(data.i||0);pause()}
  requestAnimationFrame(t=>{last=t/1000;requestAnimationFrame(frame)});
