@@ -108,7 +108,7 @@ body.touch .keys{display:none}
         <div><dt>Climb up and down</dt><dd class="k1">W S</dd><dd class="k2">↑ ↓</dd></div>
         <div><dt>Jump</dt><dd class="k1">Space</dd><dd class="k2">Enter</dd></div>
       </dl>
-      <p class="tip">Touch a bomb to pull its fuse. Clear them all to finish the site. You cannot steer once you jump, and any fall farther than your own height is fatal. Sparks drift slowly, then shoot straight at you when you line up with them. Green ropes only go up. Blue ropes only go down. Some bombs are trapped: pulling one can remove a ladder, drop a girder or wake a guard. You start with seven lives and earn another every 10,000 points. On a phone, a thumb pad and Jump button appear. Turn it sideways to fill the screen.</p>
+      <p class="tip">Touch a bomb to pull its fuse. Clear them all to finish the site. Hold up or down together with left or right to climb without stopping: you grab the next ladder as you reach it and step off running. You cannot steer once you jump, and any fall farther than your own height is fatal. Sparks drift slowly, then shoot straight at you when you line up with them. Green ropes only go up. Blue ropes only go down. Some bombs are trapped: pulling one can remove a ladder, drop a girder or wake a guard. You start with seven lives and earn another every 10,000 points. On a phone, a thumb pad and Jump button appear. Turn it sideways to fill the screen.</p>
       <button id="snd" class="link" type="button">Sound: on</button>
     </div>
   </section>
@@ -335,7 +335,7 @@ function updPlayer(p,dt){
    else{p.state='air';p.vy=0;p.apex=p.y;p.noGrab=.3}
   }
   if(cy)p.climbT+=dt*9;
-  if(dx&&p.state==='climb'){const rr=Math.round(p.y/T);if(Math.abs(p.y-rr*T)<5&&platAt(c,rr)){p.y=rr*T;p.state='run'}}
+  if(dx&&!cy&&p.state==='climb'){const rr=Math.round(p.y/T);if(Math.abs(p.y-rr*T)<5&&platAt(c,rr)){p.y=rr*T;p.state='run'}}
   return;
  }
  if(p.state==='run'){
