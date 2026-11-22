@@ -160,7 +160,7 @@ body.touch .keys{display:none}
   </section>
 </div>
 
-<script src="boxer3d.js"></script>
+<script src="boxer3d2.js"></script>
 <script>
 (()=>{'use strict';
 const W=960,H=540,STEP=1/60;
@@ -243,7 +243,7 @@ const LASTI=BOXERS.reduce((a,b,i)=>b.open?a:i,0),FIRST3D=BOXERS.findIndex(b=>b.l
 const G={state:'menu',time:0,pick:FIRST3D<0?0:FIRST3D,hudTop:14};
 let F=null,fx=[];
 const PY=()=>F&&F.def.look.model?580:552,BODYY=()=>F&&F.def.look.bodyY||300;
-const YOU3D='champ',you3d=()=>!!(window.R3D&&R3D.ok(YOU3D));
+const YOU3D='champ';let you3dOff=false;const you3d=()=>!you3dOff&&!!(window.R3D&&R3D.drawPlayer&&R3D.ok(YOU3D));
 const SAVE={unlocked:1,wins:[],sound:1};
 try{Object.assign(SAVE,JSON.parse(localStorage.getItem('bellringer')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('bellringer',JSON.stringify(SAVE))}catch(e){}};
@@ -665,7 +665,7 @@ function drawYou3D(c){
  return true;
 }
 function drawYou(c){
- if(you3d()&&drawYou3D(c))return;
+ if(you3d()){let done=false;c.save();try{done=drawYou3D(c)}catch(e){you3dOff=true}c.restore();if(done)return}
  const f=F,p=f.p,px=480+p.off,py=PY()+p.dy,col=p.flash>0?'#fff':p.tired?'#f29bb4':MINT,dark=p.tired?'#b86a80':'#1f8f5f';
  if(p.dy>270)return;
  c.lineJoin='round';c.lineCap='round';c.strokeStyle=ARENA;c.lineWidth=3;
