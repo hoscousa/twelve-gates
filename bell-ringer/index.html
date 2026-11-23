@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Bell Ringer Boxing</title>
+<title>Jawbreakers</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Bell Ringer">
+<meta name="apple-mobile-web-app-title" content="Jawbreakers">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#14101c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,7 +54,7 @@ body.land .pb.on{opacity:.9}
 .screen.on{display:flex}
 .card{margin:auto;width:100%;max-width:560px;display:flex;flex-direction:column;align-items:flex-start;gap:14px}
 h1,h2{font-family:var(--display);font-weight:400;margin:0;line-height:.98;text-wrap:balance}
-h1{font-size:clamp(46px,13vw,84px);color:var(--paper)}
+h1{font-size:clamp(40px,11.5vw,84px);color:var(--paper)}
 h1 em{font-style:normal;color:var(--gold)}
 h2{font-size:clamp(32px,9vw,52px);color:var(--gold)}
 .bill{margin:0;font:600 15px var(--body);letter-spacing:.22em;text-transform:uppercase;color:var(--red)}
@@ -92,14 +92,14 @@ body.touch .keys{display:none}
 </head>
 <body>
 <div id="app">
-  <div id="stage"><canvas id="game" aria-label="Bell Ringer Boxing game"></canvas></div>
+  <div id="stage"><canvas id="game" aria-label="Jawbreakers boxing game"></canvas></div>
   <button id="pauseBtn" type="button">Pause</button>
   <div id="pads"></div>
 
   <section id="menu" class="screen on" aria-label="Title">
     <div class="card">
       <p class="bill">Eight fights · Three belts</p>
-      <h1>Bell <em>Ringer</em></h1>
+      <h1>Jaw<em>breakers</em></h1>
       <p class="lede">You are the smallest boxer on the card. Watch for the tell, slip the punch, then hit back before they recover.</p>
       <div class="row"><button id="go" class="btn go primary" type="button">Fight</button></div>
       <ul class="ladder" id="ladder"></ul>
@@ -160,7 +160,7 @@ body.touch .keys{display:none}
   </section>
 </div>
 
-<script src="boxer3d2.js"></script>
+<script src="boxer3d3.js"></script>
 <script>
 (()=>{'use strict';
 const W=960,H=540,STEP=1/60;
@@ -187,15 +187,18 @@ const MOVES={
  rushR:{side:1,tell:.42,dmg:10,avoid:'DK',chain:1,rec:.1,k:'hook'},
  rushEnd:{side:1,tell:.42,dmg:10,avoid:'DK',stun:1.3,hits:4,rec:.5,k:'hook'},
  feint:{side:1,tell:.34,feint:1,k:'jab'},
+ windmill:{side:1,tell:1.15,dmg:10,avoid:'D',stun:2.3,hits:5,rec:.6,k:'windmill'},
+ braveL:{side:-1,tell:.6,dmg:13,avoid:'DK',stun:1.2,hits:3,rec:.5,k:'hook'},
+ braveR:{side:1,tell:.6,dmg:13,avoid:'DK',stun:1.2,hits:3,rec:.5,k:'hook'},
 };
 /* ---------- the card. pat = routines (numbers are pauses in seconds, 't' is showing off) ---------- */
 const CIRCUITS=['Minor circuit','Major circuit','World circuit','Your characters'];
 const BOXERS=[
  {name:'Paper Pete',tag:'Nervous first-timer',rec:'0 wins, 9 losses',wt:'121 lb',circuit:0,hp:70,speed:1.3,free:2,chin:3,dmg:.8,hearts:20,starDodge:0,guard:'alt',
-  pat:[[1.4,'jabL',1.2,'jabR',1,'t',.8,'hookR'],[1.3,'jabR',1.1,'hookL',1.2,'jabL','t']],
-  look:{sc:.95,skin:'#f3c9a5',shade:'#d9a57c',top:'#f6f1e7',trunks:'#2f6fed',stripe:'#f6f1e7',glove:'#e23d3d',hair:'bowl',hc:'#b5651d',eye:{r:13,gap:19,k:'round'},brow:{th:4,col:'#8a4a12'},nose:'long',mouth:'worry',head:{rx:40,ry:54,jaw:.78},build:{sh:70,waist:46,belly:0,th:190,neckL:30,neckW:22,arm:19},extra:'buckteeth'},
+  pat:[[1.4,'jabL',1.2,'jabR',1,'mum',.9,'windmill'],[1.3,'jabR',1.1,'windmill',1.2,'jabL','t'],[1.2,'hookL',1,'jabR',.9,'mum']],
+  look:{model:'pete',bodyY:326,sc:1,skin:'#f3c9a5',shade:'#d9a57c',top:'#f6f1e7',trunks:'#2f6fed',stripe:'#f6f1e7',glove:'#e23d3d',hair:'bowl',hc:'#b5651d',eye:{r:13,gap:19,k:'round'},brow:{th:4,col:'#8a4a12'},nose:'long',mouth:'worry',head:{rx:40,ry:58,jaw:.78},build:{sh:70,waist:46,belly:0,th:170,neckL:20,neckW:22,arm:19},extra:'buckteeth'},
   quote:'Is it too late to forfeit? My mum is watching.',
-  tip:'Pete flashes a glove before every punch. Step aside at the last moment, then hit him twice. When he drops his hands to show off, punch him for a star.'},
+  tip:'Pete shuts his eyes before every punch. Step aside at the last moment, then hit him. When he whirls both arms, only a side-step works, and he spins himself dizzy. When he waves to his mum, punch him before she cheers him on.'},
  {name:'Dozer Dunn',tag:'Slow hands, heavy hands',rec:'11 wins, 6 losses',wt:'298 lb',circuit:0,hp:92,speed:1.18,free:1,chin:3,dmg:1,hearts:20,starDodge:0,guard:'low',
   pat:[[1.2,'hookL',1,'hookR',1.2,'slam',.8,'t'],[1.1,'hookR',.9,'slam',1.1,'hookL']],
   look:{sc:1.06,skin:'#c98d5f',shade:'#a36c43',top:'#f28c28',trunks:'#3a3a3a',stripe:'#f2b632',glove:'#6a6a6a',hair:'hardhat',hc:'#f2c632',eye:{r:7,gap:21,k:'round'},brow:{th:6,col:'#3b2a1a'},nose:'bulb',mouth:'line',head:{rx:50,ry:45,jaw:1.3},build:{sh:118,waist:108,belly:44,th:185,neckL:2,neckW:52,arm:33},face:'stubble'},
@@ -280,12 +283,13 @@ const P_BH=PO(0,2,[-34,-202,1],[34,-202,1],[0,4,0]),P_BL=PO(0,8,[-30,-104,1],[30
 const P_STUN=PO(0,14,[-128,-36,.96],[128,-36,.96],[0,8,0]),P_TAUNT=PO(0,0,[-150,-118,1],[150,-118,1],[0,0,0]);
 const P_DODGE=PO(.6,10,[-40,-170,1],[92,-170,1],[10,0,.2]),P_WIN=PO(0,-6,[-112,-330,1],[112,-330,1],[0,-4,0]),P_LIE=PO(0,0,[-130,-260,1],[140,-170,1],[0,0,.25]);
 const SPK=['hx','hy','ht','hs','sq','lean','by'],WORDS=['POW!','BAM!','WHAP!','BOP!','THWACK!'];
-const EXPR={idle:['open',.1,null],tell:['wide',.6,'grit'],yell:['wide',.6,'yell'],hitFace:['shut',-.5,'stretch'],hitBody:['pop',-.55,'O'],stun:['spiral',-.3,'droop'],laugh:['happy',-.2,'laugh'],out:['x',-.25,'droop'],woozy:['woozy',-.25,'worry']};
+const EXPR={idle:['open',.1,null],tell:['wide',.6,'grit'],yell:['wide',.6,'yell'],hitFace:['shut',-.5,'stretch'],panic:['shut',-.5,'yell'],hitBody:['pop',-.55,'O'],stun:['spiral',-.3,'droop'],laugh:['happy',-.2,'laugh'],out:['x',-.25,'droop'],woozy:['woozy',-.25,'worry']};
 function tellPose(m){const s=m.side,g=[-s*58,-186,1];
  if(m.k==='hook')return side(s,-s*.1,0,[s*196,-150,.92],g,[-s*8,0,-s*.08]);
  if(m.k==='upper')return side(s,0,44,[s*96,-10,.95],[-s*60,-150,1],[0,10,0]);
  if(m.k==='over')return side(s,-s*.04,-8,[s*118,-340,1.02],g,[0,-4,0]);
  if(m.k==='slam')return PO(0,-10,[-96,-336,1.05],[96,-336,1.05],[0,-6,0]);
+ if(m.k==='windmill')return PO(0,4,[-104,-214,1.1],[104,-214,1.1],[0,10,0]);
  return side(s,-s*.05,0,[s*128,-218,.86],g,[-s*6,0,-s*.06]);
 }
 function strikePose(m){const s=m.side,g=[-s*58,-170,1];
@@ -293,6 +297,7 @@ function strikePose(m){const s=m.side,g=[-s*58,-170,1];
  if(m.k==='upper')return side(s,0,-24,[s*8,-120,2.35],[-s*60,-150,1],[0,-8,0]);
  if(m.k==='over')return side(s,s*.03,22,[s*14,50,2.25],g,[0,10,0]);
  if(m.k==='slam')return PO(0,30,[-46,40,2.1],[46,40,2.1],[0,16,0]);
+ if(m.k==='windmill')return PO(0,26,[-50,-20,2.0],[44,46,2.15],[0,14,0]);
  return side(s,s*.03,14,[s*26,30,2.15],g,[0,6,0]);
 }
 
@@ -328,7 +333,7 @@ function playerImpact(){
   if(o.hp<=0)oppDown()};
  const clang=()=>{o.blockT=.22;sfx('block');if(LK.model&&window.R3D)R3D.shake(LK.model,0,60,-220);fx.push({k:'ring',x:hx,y:hy,t:0,dur:.16,r:26})};
  if(st==='stun'){land(star?22:4);if(o.hp>0){o.hits--;o.hitT=o.t}}
- else if(st==='taunt'){land(star?20:6);if(o.hp>0){if(!star)gainStar();o.state='flinch';o.t=0;o.dur=.4}}
+ else if(st==='taunt'){o.mum=false;land(star?20:6);if(o.hp>0){if(!star)gainStar();o.state='flinch';o.t=0;o.dur=.4}}
  else if(st==='tell'){
   if(star){land(16);if(o.hp>0){o.state='stun';o.t=0;o.dur=.7;o.hits=1;o.hitT=-1}}
   else if(m.counter===zone&&o.t<=o.dur*m.cw){land(8);if(o.hp>0){gainStar();o.state='stun';o.t=0;o.dur=.85;o.hits=2;o.hitT=-1}}
@@ -358,7 +363,8 @@ function oppNext(){
  if(!o.pat||o.pi>=o.pat.length){o.pat=d.pat[Math.random()*d.pat.length|0];o.pi=0}
  const st=o.pat[o.pi++];
  if(typeof st==='number'){o.state='idle';o.t=0;o.dur=st*o.spd*rnd(.85,1.2);o.free=d.free}
- else if(st==='t'){o.state='taunt';o.t=0;o.dur=1.05*Math.max(.7,o.spd)}
+ else if(st==='t'){o.state='taunt';o.mum=false;o.t=0;o.dur=1.05*Math.max(.7,o.spd)}
+ else if(st==='mum'){o.state='taunt';o.mum=true;o.t=0;o.dur=1.5*Math.max(.7,o.spd)}
  else startMove(st);
 }
 function updOpp(dt){
@@ -372,7 +378,7 @@ function updOpp(dt){
   case'recover':if(o.t>=o.dur)oppNext();break;
   case'stun':if(o.t>=o.dur||(o.hits<=0&&o.t>=o.hitT+.2)){o.state='recover';o.t=0;o.dur=.3}break;
   case'flinch':if(o.t>=o.dur){o.state='idle';o.t=0;o.dur=.45*o.spd}break;
-  case'taunt':if(o.t>=o.dur){o.hp=Math.min(o.maxHp,o.hp+5);o.state='recover';o.t=0;o.dur=.2}break;
+  case'taunt':if(o.t>=o.dur){if(o.mum){o.mum=false;o.hp=Math.min(o.maxHp,o.hp+10);fx.push({k:'word',x:rnd(640,760),y:rnd(96,130),t:0,dur:1.1,text:'GO ON, PETE!',rot:rnd(-.12,.12)});sfx('crowd');startMove(Math.random()<.5?'braveL':'braveR')}else{o.hp=Math.min(o.maxHp,o.hp+5);o.state='recover';o.t=0;o.dur=.2}}break;
   case'dodge':if(o.t>=o.dur){o.state='idle';o.t=0;o.dur=.3}break;
  }
 }
@@ -504,7 +510,7 @@ function exprOf(o,f){
  if(st==='rising')return'woozy';
  if(o.hurtT>0||st==='flinch')return o.hitHigh?'hitFace':'hitBody';
  if(st==='stun')return'stun';
- if(st==='tell')return'tell';if(st==='strike')return'yell';if(st==='taunt')return'laugh';
+ if(st==='tell')return o.move&&o.move.k==='windmill'?'panic':'tell';if(st==='strike')return'yell';if(st==='taunt')return'laugh';
  if(f.phase==='pcount'||(f.phase==='end'&&f.result&&!f.result.win))return'laugh';
  if(f.phase==='end')return'out';
  return'idle';
@@ -591,19 +597,23 @@ function drawOpp3D(c){
  const f=F,o=f.o,L=o.def.look,q=o.pose,sp=o.sp,t=G.time,st=o.state;
  let lean=q.lean+sp.lean*1.5,bob=q.bob+sp.by,glx=q.lx,gly=q.ly,grx=q.rx,gry=q.ry;
  if(st==='idle'||st==='taunt'||st==='recover'||st==='rising'){bob+=Math.sin(t*7)*5;lean+=Math.sin(t*3.5)*.02;gly+=Math.sin(t*7+1)*4;gry+=Math.sin(t*7+2.4)*4}
- if(st==='taunt'){bob+=Math.abs(Math.sin(t*11))*-12;glx-=Math.sin(t*11)*16;grx+=Math.sin(t*11)*16}
+ let lsz=q.ls,rsz=q.rs,hxo=0,nodo=0;const mum=st==='taunt'&&o.mum;
+ if(st==='taunt'&&!mum){bob+=Math.abs(Math.sin(t*11))*-12;glx-=Math.sin(t*11)*16;grx+=Math.sin(t*11)*16}
+ if(mum){const k=clamp(o.t/.25,0,1);glx+=(-64-glx)*k;gly+=(-70-gly)*k;grx+=(150+Math.sin(t*13)*30-grx)*k;gry+=(-262-gry)*k;hxo=58*k;lean+=.05*k}
+ if(st==='tell'&&o.move&&o.move.k==='windmill'){const a=o.t*15,k=clamp(o.t/.18,0,1);glx+=(-104+Math.cos(a)*84-glx)*k;gly+=(-214+Math.sin(a)*112-gly)*k;grx+=(104-Math.cos(a+2.2)*84-grx)*k;gry+=(-214+Math.sin(a+2.2)*112-gry)*k;lsz=1.1+.22*Math.sin(a+1.2);rsz=1.1+.22*Math.sin(a+3.4);lean+=Math.sin(o.t*8)*.05*k;nodo=.35*k}
  if(st==='stun'){lean+=Math.sin(t*5)*.06;glx+=Math.sin(t*4)*12;grx+=Math.sin(t*4+2)*12}
  const stag=st==='stun'||(st==='down'&&o.t<.55);
  if(st==='down'&&o.t<.55){lean+=Math.sin(o.t*15)*.14;glx=-150+Math.cos(o.t*17)*60;gly=-170+Math.sin(o.t*17)*90;grx=150+Math.cos(o.t*17+2)*60;gry=-170+Math.sin(o.t*17+2)*90}
  const ebo=x=>{const n=7.5625,d=2.75;return x<1/d?n*x*x:x<2/d?n*(x-=1.5/d)*x+.75:x<2.5/d?n*(x-=2.25/d)*x+.9375:n*(x-=2.625/d)*x+.984375};
  const lie=o.lie,le=st==='down'?ebo(lie):lie*lie*(3-2*lie),peek=o.peekT>0?Math.sin(Math.PI*clamp(o.peekT/.6,0,1))*.2:0,fs=o.fallSide;
- const act=o.move&&(st==='tell'||st==='strike'),mvL=act&&(o.move.side<0||o.move.k==='slam'),mvR=act&&(o.move.side>0||o.move.k==='slam'),fl=o.flash>0;
+ const act=o.move&&(st==='tell'||st==='strike'),mvL=act&&(o.move.side<0||o.move.k==='slam'||o.move.k==='windmill'),mvR=act&&(o.move.side>0||o.move.k==='slam'||o.move.k==='windmill'),fl=o.flash>0;
  if(le<.5){c.fillStyle='rgba(10,8,14,.28)';c.beginPath();c.ellipse(480+lean*120,520,170,16,0,0,6.3);c.fill()}
- const a=R3D.draw(c,L.model,{t,lean,bob,hx:q.hx+sp.hx*.6+(stag?Math.sin(t*9)*12:0),hy:q.hy+sp.hy*.5,ht:q.ht+sp.ht*.6+(st==='taunt'?Math.sin(t*11)*.1:0)+(st==='stun'?Math.sin(t*9)*.14:0),hs:sp.hs,sq:sp.sq,
-  yaw:clamp((q.ls-q.rs)*.4,-.55,.55),l:{x:glx,y:gly,s:q.ls},r:{x:grx,y:gry,s:q.rs},lie:le,fs,peek,knee:stag?Math.sin(t*16):0,twitch:lie>.9?Math.max(0,Math.sin(t*7))*.5:0,
-  nod:stag?.45+Math.sin(t*5)*.25:st==='taunt'?-.5:st==='flinch'&&!o.hitHigh?.5:0,flashL:mvL&&fl,flashR:mvR&&fl,tint:o.hurtT>.2?.05:0},VW,OX,cv.width,cv.height);
+ const a=R3D.draw(c,L.model,{t,lean,bob,hx:hxo+q.hx+sp.hx*.6+(stag?Math.sin(t*9)*12:0),hy:q.hy+sp.hy*.5,ht:q.ht+sp.ht*.6+(st==='taunt'?Math.sin(t*11)*.1:0)+(st==='stun'?Math.sin(t*9)*.14:0),hs:sp.hs,sq:sp.sq,
+  yaw:clamp((q.ls-q.rs)*.4,-.55,.55),l:{x:glx,y:gly,s:lsz},r:{x:grx,y:gry,s:rsz},lie:le,fs,peek,knee:stag?Math.sin(t*16):0,twitch:lie>.9?Math.max(0,Math.sin(t*7))*.5:0,
+  nod:nodo+(stag?.45+Math.sin(t*5)*.25:mum?0:st==='taunt'?-.5:st==='flinch'&&!o.hitHigh?.5:0),flashL:mvL&&fl,flashR:mvR&&fl,tint:o.hurtT>.2?.05:0,expr:mum?'happy':exprOf(o,f)},VW,OX,cv.width,cv.height);
  if(!a)return false;
  c.lineJoin='round';
+ if(mum&&o.t>.2){const bx=a.head[0]+118,by=a.head[1]+6;c.fillStyle='#fff';c.strokeStyle=ARENA;c.lineWidth=4;c.beginPath();c.moveTo(bx-46,by-24);c.arcTo(bx+62,by-24,bx+62,by+22,16);c.arcTo(bx+62,by+22,bx-62,by+22,16);c.arcTo(bx-62,by+22,bx-62,by-24,16);c.arcTo(bx-62,by-24,bx+62,by-24,16);c.closePath();c.fill();c.stroke();c.beginPath();c.moveTo(bx-58,by+6);c.lineTo(bx-82,by+22);c.lineTo(bx-50,by+16);c.closePath();c.fill();c.stroke();c.fillStyle='#fff';c.fillRect(bx-58,by+2,12,14);c.fillStyle=ARENA;c.font='700 24px '+FB;c.textAlign='center';c.textBaseline='middle';c.fillText('Hi Mum!',bx,by)}
  if(st==='stun'||(st==='down'&&(o.t<.55||lie>.9)))for(let k=0;k<3;k++){const an=t*5+k*2.1;c.fillStyle=GOLD;c.strokeStyle=ARENA;c.lineWidth=2;c.beginPath();const sx=a.head[0]+Math.cos(an)*72,sy=a.head[1]-6+Math.sin(an)*14;for(let i=0;i<10;i++){const r=i%2?5:12,aa=i*Math.PI/5;c.lineTo(sx+Math.cos(aa)*r,sy+Math.sin(aa)*r)}c.closePath();c.fill();c.stroke()}
  if(fl)for(const [on,g] of [[mvL,a.l],[mvR,a.r]])if(on){c.strokeStyle='#fff';c.lineWidth=5;c.beginPath();for(let k=0;k<8;k++){const an=k*Math.PI/4;c.moveTo(g[0]+Math.cos(an)*58,g[1]+Math.sin(an)*58);c.lineTo(g[0]+Math.cos(an)*84,g[1]+Math.sin(an)*84)}c.stroke()}
  return true;
@@ -642,7 +652,7 @@ function drawOpp(c){
  if(L.extra==='scarf'){c.fillStyle=RED;rr(c,-B.neckW*.9,-B.th-10,B.neckW*1.8,22,9);c.fill();c.stroke();c.beginPath();c.moveTo(B.neckW*.5,-B.th+8);c.lineTo(B.neckW*.5+22+Math.sin(t*6)*4,-B.th+62);c.lineTo(B.neckW*.5-2+Math.sin(t*6)*4,-B.th+66);c.lineTo(B.neckW*.5-16,-B.th+10);c.closePath();c.fill();c.stroke()}
  c.save();c.translate(HX,HY);c.rotate(q.ht+sp.ht*.6+(st==='taunt'?Math.sin(t*11)*.1:0)+(st==='stun'?Math.sin(t*9)*.12:0));c.scale(1+sp.hs*.9,1-sp.hs*.65);headDraw(c,o,L,ex);c.restore();
  if(st==='stun'||(st==='down'&&(o.t<.55||lie>.9)))for(let k=0;k<3;k++){const a=t*5+k*2.1;c.fillStyle=GOLD;c.strokeStyle=ARENA;c.lineWidth=2;c.beginPath();const sx=HX+Math.cos(a)*(Hd.rx+16),sy=HY-Hd.ry-16+Math.sin(a)*12;for(let i=0;i<10;i++){const r=i%2?5:12,aa=i*Math.PI/5;c.lineTo(sx+Math.cos(aa)*r,sy+Math.sin(aa)*r)}c.closePath();c.fill();c.stroke()}
- const act=o.move&&(st==='tell'||st==='strike'),mvL=act&&(o.move.side<0||o.move.k==='slam'),mvR=act&&(o.move.side>0||o.move.k==='slam');
+ const act=o.move&&(st==='tell'||st==='strike'),mvL=act&&(o.move.side<0||o.move.k==='slam'||o.move.k==='windmill'),mvR=act&&(o.move.side>0||o.move.k==='slam'||o.move.k==='windmill');
  const arms=[[-1,glx,gly,q.ls,mvL],[1,grx,gry,q.rs,mvR]].sort((a,b)=>a[3]-b[3]);
  for(const [s,gx,gy,gs,mv] of arms){
   const ax=s*B.sh*.9,ay=-B.th+18,d=Math.hypot(gx-ax,gy-ay),hh=clamp((230-d)*.4,0,84),up=gy<ay-120?-.5:1,ex2=(ax+gx)/2+s*hh*.5,ey2=(ay+gy)/2+hh*.85*up;
